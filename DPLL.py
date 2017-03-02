@@ -68,7 +68,7 @@ while new_line != '':
     new_line = input_file.readline()
 # initialize assignment
 model = [[]] * total_guests
-for i in range(len(model)):
+for i in range(total_guests):
     model[i] = [0] * total_tables
 
 

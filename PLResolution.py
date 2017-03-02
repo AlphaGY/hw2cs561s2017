@@ -1,5 +1,6 @@
+# prefix 1=positive -1=negative
 class Literal:
-    prefix = True
+    prefix = 1
     guest = 0
     table = 0
 
@@ -7,6 +8,14 @@ class Literal:
         self.prefix = p
         self.guest = g
         self.table = t
+        pass
+
+
+class Clause:
+    literals = []
+
+    def __init__(self, ls):
+        self.literals = ls
         pass
 
 
@@ -21,16 +30,16 @@ total_tables = int(new_line.split(' ')[1])
 kb = []
 for i in range(total_guests):
     # a guest must be at some table
-    guest_at_some_table_clause = []
+    guest_at_some_table_clause = Clause([])
     for j in range(total_tables):
-        literal = Literal(True, i, j)
+        literal = Literal(1, i, j)
         # a guest must be at some table
-        guest_at_some_table_clause.append(literal)
-        literal = Literal(False, i, j)
+        guest_at_some_table_clause.literals.append(literal)
+        literal = Literal(-1, i, j)
         for k in range(j + 1, total_tables):
             # a guest can only be at one table = cannot be at two tables at the same time
-            literal2 = Literal(False, i, k)
-            guest_at_one_table_clause = [literal, literal2]
+            literal2 = Literal(-1, i, k)
+            guest_at_one_table_clause = Clause([literal, literal2])
             kb.append(guest_at_one_table_clause)
     kb.append(guest_at_some_table_clause)
 # read relationships from input file
@@ -41,38 +50,42 @@ while new_line != '':
     # friends must be at the same table
     if new_line[4] == 'F':
         for i in range(total_tables):
-            guest1_literal = Literal(False, a, i)
-            guest2_literal = Literal(True, b, i)
-            clause = [guest1_literal, guest2_literal]
+            guest1_literal = Literal(-1, a, i)
+            guest2_literal = Literal(1, b, i)
+            clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
-            guest1_literal = Literal(True, a, i)
-            guest2_literal = Literal(False, b, i)
-            clause = [guest1_literal, guest2_literal]
+            guest1_literal = Literal(1, a, i)
+            guest2_literal = Literal(-1, b, i)
+            clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
     # enemies cannot be at the same table
     if new_line[4] == 'E':
         for i in range(total_tables):
-            guest1_literal = Literal(False, a, i)
-            guest2_literal = Literal(False, b, i)
-            clause = [guest1_literal, guest2_literal]
+            guest1_literal = Literal(-1, a, i)
+            guest2_literal = Literal(-1, b, i)
+            clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
     new_line = input_file.readline()
+# initialize assignment
+model = [[]] * total_guests
+for i in range(len(model)):
+    model[i] = [0] * total_tables
 
 
 # return the list of positive literals in clause
-def get_positive_literals(clause):
+def get_positive_symbols(clause):
     positive_literals = []
-    for literal in clause:
-        if literal.prefix:
+    for literal in clause.literals:
+        if literal.prefix == 1:
             positive_literals.append(literal)
     return positive_literals
 
 
 # return the list of negative literals in clause
-def get_negative_literals(clause):
+def get_negative_symbols(clause):
     negative_literals = []
-    for literal in clause:
-        if not literal.prefix:
+    for literal in clause.literals:
+        if literal.prefix == -1:
             negative_literals.append(literal)
     return negative_literals
 
@@ -96,8 +109,8 @@ def is_complementary_symbol(symbol1, symbol2):
 # calculate complementary set of literals of two clauses
 def get_complementary_literals(clause1, clause2):
     complementary = []
-    for literal1 in clause1:
-        for literal2 in clause2:
+    for literal1 in clause1.literals:
+        for literal2 in clause2.literals:
             if is_complementary_symbol(literal1, literal2):
                 complementary.append(literal1)
     return complementary
@@ -105,9 +118,9 @@ def get_complementary_literals(clause1, clause2):
 
 # check whether a clause is a tautology
 def is_tautology(clause):
-    for i in range(len(clause) - 1):
-        for j in range(i + 1, len(clause)):
-            if is_complementary_symbol(clause[i], clause[j]):
+    for i in range(len(clause.literals) - 1):
+        for j in range(i + 1, len(clause.literals)):
+            if is_complementary_symbol(clause.literals[i], clause.literals[j]):
                 return True
     return False
 
@@ -116,13 +129,13 @@ def is_tautology(clause):
 def pl_resolve(complementary, clause1, clause2):
     resolvents = []
     for comp in complementary:
-        resolvent = []
-        for literal1 in clause1:
+        resolvent = Clause([])
+        for literal1 in clause1.literals:
             if not is_same_literal(comp, literal1):
-                resolvent.append(literal1)
-        for literal2 in clause2:
+                resolvent.literals.append(literal1)
+        for literal2 in clause2.literals:
             if not is_complementary_symbol(comp, literal2):
-                resolvent.append(literal2)
+                resolvent.literals.append(literal2)
         if not is_tautology(resolvent):
             resolvents.append(resolvent)
     return resolvents
@@ -130,10 +143,10 @@ def pl_resolve(complementary, clause1, clause2):
 
 # check if two clauses are the same
 def is_same_clause(c1, c2):
-    if len(c1) == len(c2):
-        for i in c1:
+    if len(c1.literals) == len(c2.literals):
+        for i in c1.literals:
             is_same = False
-            for j in c2:
+            for j in c2.literals:
                 if is_same_literal(i, j):
                     is_same = True
                     break
@@ -158,7 +171,7 @@ def is_subset(super, sub):
 # check whether some clauses contain empty clause
 def contains_empty(clauses):
     for clause in clauses:
-        if len(clause) == 0:
+        if len(clause.literals) == 0:
             return True
     return False
 

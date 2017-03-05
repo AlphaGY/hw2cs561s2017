@@ -47,7 +47,7 @@ while new_line != '':
     a = int(new_line.split(' ')[0]) - 1
     b = int(new_line.split(' ')[1]) - 1
     # friends must be at the same table
-    if new_line.split(' ')[2] == 'F':
+    if new_line.split(' ')[2] == 'F\n':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(1, b, i)
@@ -58,7 +58,7 @@ while new_line != '':
             clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
     # enemies cannot be at the same table
-    if new_line.split(' ')[2] == 'E':
+    if new_line.split(' ')[2] == 'E\n':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(-1, b, i)
@@ -69,6 +69,8 @@ while new_line != '':
 model = [[]] * total_guests
 for i in range(total_guests):
     model[i] = [0] * total_tables  # check if two symbol are the same symbol
+for i in range(len(model)):
+    model[i] = [0] * total_tables
 
 
 # doesn't care about the positiveness or negativeness of the literal

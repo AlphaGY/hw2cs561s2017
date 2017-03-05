@@ -23,8 +23,7 @@ class Clause:
 
 
 # read from input file
-input_file = open('input.txt', 'r')
-# initialize the number of guests and tables
+input_file = open('input.txt', 'r')  # initialize the number of guests and tables
 new_line = input_file.readline()
 total_guests = int(new_line.split(' ')[0])
 total_tables = int(new_line.split(' ')[1])
@@ -48,10 +47,10 @@ for i in range(total_guests):
 # read relationships from input file
 new_line = input_file.readline()
 while new_line != '':
-    a = int(new_line[0]) - 1
-    b = int(new_line[2]) - 1
+    a = int(new_line.split(' ')[0]) - 1
+    b = int(new_line.split(' ')[1]) - 1
     # friends must be at the same table
-    if new_line[4] == 'F':
+    if new_line.split(' ')[2] == 'F':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(1, b, i)
@@ -62,7 +61,7 @@ while new_line != '':
             clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
     # enemies cannot be at the same table
-    if new_line[4] == 'E':
+    if new_line.split(' ')[2] == 'E':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(-1, b, i)
@@ -72,10 +71,9 @@ while new_line != '':
 # initialize assignment
 model = [[]] * total_guests
 for i in range(total_guests):
-    model[i] = [0] * total_tables
+    model[i] = [0] * total_tables  # check if two symbol are the same symbol
 
 
-# check if two symbol are the same symbol
 # doesn't care about the positiveness or negativeness of the literal
 def is_same_symbol(symbol1, symbol2):
     if symbol1.guest == symbol2.guest and symbol1.table == symbol2.table:
@@ -207,14 +205,3 @@ def walksat(cls, p):
             m = random_flip_symbol(cls[clause_index], m)
         else:
             m = maximize_satisfied_clauses(cls, m)
-
-
-# print_assignment
-def print_model(m):
-    for i in range(total_guests):
-        for j in range(total_tables):
-            if m[i][j] == 1:
-                print str(i + 1) + " " + str(j + 1)
-
-
-print_model(walksat(kb, 0.5))

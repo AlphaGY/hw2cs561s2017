@@ -50,10 +50,10 @@ for i in range(total_guests):
 # read relationships from input file
 new_line = input_file.readline()
 while new_line != '':
-    a = int(new_line[0]) - 1
-    b = int(new_line[2]) - 1
+    a = int(new_line.split(' ')[0]) - 1
+    b = int(new_line.split(' ')[1]) - 1
     # friends must be at the same table
-    if new_line[4] == 'F':
+    if new_line.split(' ')[2] == 'F':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(1, b, i)
@@ -64,7 +64,7 @@ while new_line != '':
             clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
     # enemies cannot be at the same table
-    if new_line[4] == 'E':
+    if new_line.split(' ')[2] == 'E':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(-1, b, i)
@@ -75,11 +75,6 @@ while new_line != '':
 model = [[]] * total_guests
 for i in range(total_guests):
     model[i] = [0] * total_tables
-
-
-# print Literal
-def print_literal(l):
-    print str(l.prefix) + " " + str(l.guest) + " " + str(l.table)
 
 
 # check if two symbol are the same symbol

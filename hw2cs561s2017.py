@@ -53,7 +53,8 @@ while new_line != '':
     a = int(new_line.split(' ')[0]) - 1
     b = int(new_line.split(' ')[1]) - 1
     # friends must be at the same table
-    if new_line.split(' ')[2] == 'F\n':
+    relationship = len(new_line.split(' ')[0]) + len(new_line.split(' ')[1]) + 2
+    if new_line[relationship] == 'F':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(1, b, i)
@@ -64,7 +65,7 @@ while new_line != '':
             clause = Clause([guest1_literal, guest2_literal])
             kb.append(clause)
     # enemies cannot be at the same table
-    if new_line.split(' ')[2] == 'E\n':
+    if new_line[relationship] == 'E':
         for i in range(total_tables):
             guest1_literal = Literal(-1, a, i)
             guest2_literal = Literal(-1, b, i)
